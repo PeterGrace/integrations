@@ -5,15 +5,11 @@ import argparse
 import time
 
 parser = argparse.ArgumentParser(description='Collects monitoring data from Pingdom.')
-parser.add_argument('-u', '--pingdom-user-name', help='The Pingdom User Name', required=True)
-parser.add_argument('-p', '--pingdom-password', help='The Pingdom Password', required=True)
 parser.add_argument('-a', '--pingdom-api-key', help='The Pingdom API-KEY', required=True)
 
 class Pingdom:
-    def __init__(self, api_key, user_name, password):
+    def __init__(self, api_key):
         self.api_key = api_key,
-        self.user_name = user_name,
-        self.password = password,
         self.jsonData = []
 
     def handle_error(self, error_message):
@@ -21,9 +17,9 @@ class Pingdom:
         sys.exit(1)
 
     def call_api(self, api):
-        headers = {'App-Key': self.api_key[0]}
-        base_api = 'https://api.pingdom.com/api/2.0/' + api
-        response = requests.get(base_api, headers=headers, auth=requests.auth.HTTPBasicAuth(self.user_name[0], self.password[0]))
+        headers = {'Authorization': 'Bearer ' + self.api_key[0]}
+        base_api = 'https://api.pingdom.com/api/3.1/' + api
+        response = requests.get(base_api, headers=headers)
 
         if response.status_code == 200:
             return response.json()
@@ -86,7 +82,7 @@ class Pingdom:
 if __name__ == "__main__":
     try:
         args = parser.parse_args()
-        pingdom = Pingdom(args.pingdom_api_key, args.pingdom_user_name, args.pingdom_password)
+        pingdom = Pingdom(args.pingdom_api_key)
         pingdom.get_checks()
         pingdom.get_credits()
         pingdom.get_maintenance()
